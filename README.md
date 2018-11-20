@@ -1,5 +1,6 @@
 # branches.js
 set and populate variables embeded in an html
+a running example <a href="https://guylou.github.io/branches/">here</a>
 
 Set your html as a template Use ajax and create super-light-onepage-webapps
 
