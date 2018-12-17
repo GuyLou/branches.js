@@ -1,13 +1,18 @@
-//var HTvarnames = tempstr.match(/(\{)(\$).*?(\})/i);
+class branches {
 
-var branches = {};
 
-function initBranches() {
+constructor() {
+	this.initBranches();
+}
+
+
+
+initBranches() {
  var branch = {};
  var tempstr = "";
  var comment = "";
  var nods = document.getElementsByClassName("branches");
-	for (i = 0;i < nods.length;i++) {
+	for (var i = 0;i < nods.length;i++) {
 
 	  tempstr = nods[i].innerHTML;
 	  var varNames = tempstr.match(/\{\$(.*?)\}/i); // match groups! use exec
@@ -24,7 +29,7 @@ function initBranches() {
 		  var attr = [];
 		  var newattrname = '';
 		  var newattr2add = [];
-				for (j = 0;j < attribs.length;j++) {
+				for (var j = 0;j < attribs.length;j++) {
 					tempstr2 = attribs[j].value;
 			varNames2 = tempstr2.match(/\{\$(.*?)\}/i);
 			if (varNames2 !== null)  {
@@ -48,14 +53,14 @@ function initBranches() {
 	  }
   }
   
-  function plantHTML(key,value) {
+  plantHTML(key,value) {
    var nods = document.getElementsByClassName("branch_html_" + key);
    var tempstr = "";
    var tempcomment = "";
    var tempcomment2 = "";
    var comment = "";
    // get elements by class name branch_key
-   for (i = 0;i < nods.length;i++) {
+   for (var i = 0;i < nods.length;i++) {
    	tempcomment = nods[i].childNodes[0].nodeValue;
 
     comment = document.createComment(tempcomment);
@@ -67,12 +72,12 @@ function initBranches() {
    }
   }
   
-    function plantAttrib(key,value) {
+    plantAttrib(key,value) {
   	var nods = document.getElementsByClassName("branch_attrib_" + key);
     	var aname = '';
       var avalue = '';
       var org = '';
-    for (i = 0;i < nods.length;i++) {
+    for (var i = 0;i < nods.length;i++) {
     	aname = nods[i].getAttribute("branch_attrib_key_name");
       org = nods[i].getAttribute("branch_attrib_key_" + key);
     	avalue = org.replace("{$"+ key +"}",value);
@@ -83,14 +88,14 @@ function initBranches() {
   }
 
   
-  function climbABranch(bran) {
+  climbABranch(bran) {
    	for (var i in bran) {
- 			plantHTML(i,bran[i]);
-      plantAttrib(i,bran[i]);
+		this.plantHTML(i,bran[i]);
+		this.plantAttrib(i,bran[i]);
     }
   
   
   }
   
   
-// initBranches();
+}
