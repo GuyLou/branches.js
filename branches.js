@@ -1,20 +1,119 @@
 class branches {
 	/*
 	(c) Guy Louzon, guylou@outlook.com, GNU 3
+	https://www.github.com/GuyLou/branches.js/
 	*/
-	constructor() {
+	
+	/*
+	con1: no params (!arguments.length): masterNode = document, masterClass = branch
+	con2: masterNode, masterClass
+	con3: masterNode = tmplt, url, masterClass
+	new branches by: template fmasterNode, document default
+	*/
+
+	
+	constructor(params = {}) {
+	    this.classDefaults();
+		if (Object.entries(params).length === 0) {
+			this.type = this.defaults.type;
+			this.masterNode = document;
+			this.masterClass = this.defaults.masterClass;
+			this.tmplt = '';
+		} else {
+			if (typeof params.masterNode !== 'undefined') {
+				//on error resume next
+				try {
+					switch (params.masterNode.substring(0,1)) {
+						case '#':
+							this.masterNode = document.getElementById(params.masterNode.substring(1,params.masterNode.length));
+						break;
+						case '.':
+							this.masterNode = document.getElementsByClassName(params.masterNode.substring(1,params.masterNode.length))[0];
+						break;
+						default:
+							this.masterNode = document.getElementsByTagName(params.masterNode)[0];
+						break;
+					}
+				} catch(err) {
+					this.masterNode = document; // default
+				}
+			} else {
+			    this.masterNode = document;
+			}
+			
+			if (typeof params.masterClass !== 'undefined') {
+				this.masterClass = params.masterClass;
+			} else {
+				this.masterClass = this.defaults.masterClass;
+			}
+			
+			if (params.type == 'leaves') {
+				this.type = 'leaves';
+			} else {
+				this.type = this.defaults.type;
+			}
+			
+			if (typeof params.tmplt !== 'undefined') {
+				this.tmplt = params.tmplt;
+			}
+
+	    }
+
+        if (params.type == 'leaves') {
+            this.leaves = {}; // ad inside initLeaves ?
+			this.initLeaves();
+	    } else {
+			this.initBranches();			
+		}
+		//let thisFunc = "this." + this.typeFunctions[this.type];
+		//console.log("thisFunc: " + thisFunc);
+		//window[thisFunc]();
+	    // this load default function by type
+	    
+	    //console.log("this object: ");
+	    //console.log(this);
+
+    }
+	
+	getThis() { // for test purposees only, to remove !!
+		return this;
+	}
+	
+	classDefaults() {
+    	this.defaults = {
+    		"type":"branches", // can be branches or leaves
+    		//"masterNode":"default", // any element: either #id, .class or tag
+    		"masterClass":"branches", // default class name to work on
+    		"tmplt":"", // if empty, the innerHTML of masterNode is taken
+    		"tmplt_url":"" // optional - source of the template
+    	}
+    	this.typeFunctions = {
+    	    "leaves" : "initLeaves",
+    	    "branches" : "initBranches"
+    	}
+	}
+	
+	constructor0(masterNode = 'document',masterClass = 'branches', masterLeaves = 'leaves') {
+		if (masterNode == 'document') {
+			this.masterNode = document;
+		} else {
+			document.getElementById(masterNode);
+		}
+		// if !masterNode - console.log Bang! break
+		this.masterClass = masterClass;
 		this.initBranches();
 		this.leaves = {};
 		this.initLeaves();
 	}
-
-
+	
 
 	initBranches() {
 	 var branch = {};
 	 var tempstr = "";
 	 var comment = "";
-	 var nods = document.getElementsByClassName("branches");
+	 var nods = this.masterNode.getElementsByClassName(this.masterClass);
+	 //console.log("initBranches nods:");
+	 //console.log(nods);
 		for (var i = 0;i < nods.length;i++) {
 
 		  tempstr = nods[i].innerHTML;
@@ -56,8 +155,8 @@ class branches {
 		  }
 	  }
   
-  plantHTML(key,value) {
-   var nods = document.getElementsByClassName("branch_html_" + key);
+	plantHTML(key,value) {
+   var nods = this.masterNode.getElementsByClassName("branch_html_" + key);
    var tempstr = "";
    var tempcomment = "";
    var tempcomment2 = "";
@@ -76,7 +175,7 @@ class branches {
   }
   
     plantAttrib(key,value) {
-  	var nods = document.getElementsByClassName("branch_attrib_" + key);
+  	var nods = this.masterNode.getElementsByClassName("branch_attrib_" + key);
     	var aname = '';
       var avalue = '';
       var org = '';
@@ -99,54 +198,91 @@ class branches {
 	  
 	}
 	
+	/*
+		<div class="leaves" id="abc">
+			<div class="template">{$var1}
+				<span>{$var2}</span>
+			</div>
+		
+		</div>
+	*/
+	
 	initLeaves() {
-		var nods = document.getElementsByClassName("leaves");
+		var nods = this.masterNode.getElementsByClassName(this.masterClass);
+		// use template
 		for (var i = 0;i < nods.length;i++) {
 			var leafId = nods[i].getAttribute("id");
-			if (leafId == undefined) break;
-			var tempstr = nods[i].innerHTML;
+			if (typeof leafId == 'undefined') break;
+            var tempstr = nods[i].innerHTML;
+            this.initLeaf(tempstr,leafId);
+            /*
 			var leaf = {};
 			leaf['leafId'] = leafId;
 			leaf['tmplt'] = tempstr;
 			leaf['vars'] = tempstr.match(/\{\$(.*?)\}/ig);
 			this.leaves[leafId] = leaf;
+			*/
 		}
-		console.log("this.leaves ");
-		console.log(this.leaves);
 	}
 	
+	initLeaf(tmplt,leafId) {
+		// get a string template parse and return it
+			var leaf = {};
+			leaf['leafId'] = leafId;
+			leaf['tmplt'] = tmplt;
+			leaf['vars'] = leaf['tmplt'].match(/\{\$(.*?)\}/ig);
+			this.leaves[leafId] = leaf;
+	}
+	
+	
 	sprout(leafId,params) {
-		console.log(params);
-		var tempstr = this.leaves[leafId].tmplt;
-		var tmp2 = '';
-		var vars = this.leaves[leafId].vars;
-		console.log("vars");
-		console.log(vars);
+	    let leaf = this.leaves[leafId];
+		let tempstr = leaf['tmplt'];
+		let vars = leaf['vars'];
 		for (var i in params) {
-			tempstr = this.replaceAll(tempstr,'{\\$' + i + '}',params[i]);
-
+		    tempstr = tempstr.replace(new RegExp('{\\$' + i + '}', 'g'), params[i]);
+			//tempstr = tempstr.replace('{$' + i + '}',params[i]);
 		}
-		
 		return tempstr;
 	}
-
-    replaceAll(str, find, replace) {
-        return str.replace(new RegExp(find, 'g'), replace);
-    }
-  
-	leavesLuv(leafId,itemsjson,append = 1) {
-
+	
+	generateLeaves(leafId,itemsjson) {
+		// get object and leaf
+		// call sprout for each object's objects
+		// aggregate the results to 1 string
+		// add or replace the string as the leaf innerHTML
 		var Luv = '';
 		for (var key in itemsjson) {
 			Luv += this.sprout(leafId,itemsjson[key]);
 		}
-		var elem = document.getElementById(leafId);
-		
-		tempHTML = '';
-		if (append == 1) {
-			var tempHTML = elem.innerHTML;
-		}
-		elem.innerHTML = tempHTML + Luv;
-		
+		// var elem = this.masterNode.getElementById(leafId);
+		let elems = this.masterNode.getElementsByClassName(this.masterClass);
+		let elem = elems[0]; //this.masterNode.querySelector("." + leafId); // getElementsByClassName(leafId)[0];
+		return Luv;
+	    
 	}
+  
+	leavesLuv(leafId,itemsjson,append = 1) {
+        let filler = this.generateLeaves(leafId,itemsjson);
+        // unlinke before an element id is required
+        this.renderTemplate(leafId,filler,append); /*this.masterNode.getElementsByClassName(this.masterClass)[0].getAttribute("id")*/
+        /*
+		var tempHTML = '';
+		if (append == 1) {
+			tempHTML = elems[0].innerHTML;
+		}
+		elems[0].innerHTML = tempHTML + Luv;
+		*/
+	}
+
+	renderTemplate(elemId,filler,append = 1) {
+	    let tempHTML = '';
+	    let elem = document.getElementById(elemId);
+		if (append == 1) {
+			tempHTML = elem.innerHTML;
+		}
+		elem.innerHTML = tempHTML + filler;	
+	}
+
+	
 }
