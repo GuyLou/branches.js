@@ -16,8 +16,8 @@ the {$parameter} was chosen in order to simply import multi-line string template
 creates a new branches instance
 optional parameters:
 * type - default branches. either leaves or branches:
-** leaves - for repetetive (by loop) html nodes to be inserted inside the same selected node
-** branches - for handling a single node, with the ability to update that node during a session
+    * leaves - for repetetive (by loop) html nodes to be inserted inside the same selected node
+    * branches - for handling a single node, with the ability to update that node during a session
 * masterNode - default - document. the node on which the instance will engage. can be any node, set by either #id, .class or tag
 * masterClass - the class the desired to be engaged nodes will be makred in. default "branches"
 * tmplt - the html text to be inserted. if empty, the innerHTML of masterNode is taken
